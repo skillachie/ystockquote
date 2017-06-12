@@ -22,12 +22,13 @@ try:
     # py3
     from urllib.request import Request, urlopen
     from urllib.parse import urlencode
+    from imp import reload
 except ImportError:
     # py2
     from urllib2 import Request, urlopen
     from urllib import urlencode
     import sys
-    reload(sys)  
+    reload(sys)
     sys.setdefaultencoding('utf8')
 
 
