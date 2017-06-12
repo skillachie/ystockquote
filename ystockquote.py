@@ -26,6 +26,9 @@ except ImportError:
     # py2
     from urllib2 import Request, urlopen
     from urllib import urlencode
+    import sys
+    reload(sys)  
+    sys.setdefaultencoding('utf8')
 
 
 def _request(symbol, stat):
