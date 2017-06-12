@@ -466,32 +466,35 @@ def get_short_ratio(symbol):
 
 def _get_headers():
     headers = {
-	'Connection': 'keep-alive',
-	'Expires': str(-1),
-	'Upgrade-Insecure-Requests': str(1),
-	# Google Chrome:
-	'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36'  # noqa
+        'Connection': 'keep-alive',
+        'Expires': str(-1),
+        'Upgrade-Insecure-Requests': str(1),
+        # Google Chrome:
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) \
+                AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36'  # noqa
     }
 
     return headers
 
+
 def _get_crumb_cookie(symbol):
     # Scrape a history page for a valid crumb ID:
     tu = "https://finance.yahoo.com/quote/{}/history".format(symbol)
-    
-    req = Request(tu,headers=_get_headers())
+    req = Request(tu, headers=_get_headers())
     resp = urlopen(req)
-    cookies=resp.info()['Set-Cookie']
+    cookies = resp.info()['Set-Cookie']
 
     content = str(resp.read().decode('utf-8').strip())
 
     # Matches: {"crumb":"AlphaNumeric"}
     rpat = '"CrumbStore":{"crumb":"([^"]+)"}'
     crumb = re.findall(rpat, content)[0]
-    return  {'crumb':crumb.encode('ascii').decode('unicode-escape'), 'cookie':cookies}
+    crumb_cookie = {'crumb': crumb.encode('ascii').decode('unicode-escape'),
+                    'cookie': cookies}
+    return crumb_cookie
 
 
-def get_historical_prices(symbol, start_date, end_date,interval='1d'):
+def get_historical_prices(symbol, start_date, end_date, interval='1d'):
     """
     Get historical prices for the given ticker symbol.
     Date format is 'YYYY-MM-DD'
@@ -515,9 +518,10 @@ def get_historical_prices(symbol, start_date, end_date,interval='1d'):
         'crumb': crumb_cookie['crumb']
         })
 
-    url = 'https://query1.finance.yahoo.com/v7/finance/download/{}?{}'.format(symbol,params)
+    url = 'https://query1.finance.yahoo.com/v7/finance/download/{}\
+            ?{}'.format(symbol, params)
 
-    req = Request(url,headers=_get_headers())
+    req = Request(url, headers=_get_headers())
     req.add_header("Cookie", crumb_cookie['cookie'])
     resp = urlopen(req)
     content = str(resp.read().decode('utf-8').strip())
