@@ -1,0 +1,16 @@
+# config for Travis-CI
+# https://travis-ci.org/cgoldberg/ystockquote
+
+language: python
+python:
+    - 2.7
+    - 3.3
+    - 3.4
+    - 3.5
+    - 3.6
+install:
+    - pip install flake8
+before_script:
+    - flake8
+script:
+    - python -m unittest discover
