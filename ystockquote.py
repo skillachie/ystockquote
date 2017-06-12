@@ -489,9 +489,8 @@ def _get_crumb_cookie(symbol):
     # Matches: {"crumb":"AlphaNumeric"}
     rpat = '"CrumbStore":{"crumb":"([^"]+)"}'
     crumb = re.findall(rpat, content)[0]
-    crumb_cookie = {'crumb': crumb.encode('ascii').decode('unicode-escape'),
-                    'cookie': cookies}
-    return crumb_cookie
+    return {'crumb': crumb.encode('ascii').decode('unicode-escape'),
+            'cookie': cookies}
 
 
 def get_historical_prices(symbol, start_date, end_date, interval='1d'):
@@ -518,8 +517,8 @@ def get_historical_prices(symbol, start_date, end_date, interval='1d'):
         'crumb': crumb_cookie['crumb']
         })
 
-    url = 'https://query1.finance.yahoo.com/v7/finance/download/{}\
-            ?{}'.format(symbol, params)
+    url = 'https://query1.finance.yahoo.com/v7/finance/download/{}?{}'.\
+        format(symbol, params)
 
     req = Request(url, headers=_get_headers())
     req.add_header("Cookie", crumb_cookie['cookie'])
