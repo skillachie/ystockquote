@@ -15,6 +15,8 @@
 
 __version__ = '0.2.6dev'  # NOQA
 
+import time
+import re
 
 try:
     # py3
@@ -462,7 +464,34 @@ def get_short_ratio(symbol):
     return _request(symbol, 's7')
 
 
-def get_historical_prices(symbol, start_date, end_date):
+def _get_headers():
+    headers = {
+	'Connection': 'keep-alive',
+	'Expires': str(-1),
+	'Upgrade-Insecure-Requests': str(1),
+	# Google Chrome:
+	'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36'  # noqa
+    }
+
+    return headers
+
+def _get_crumb_cookie(symbol):
+    # Scrape a history page for a valid crumb ID:
+    tu = "https://finance.yahoo.com/quote/{}/history".format(symbol)
+    
+    req = Request(tu,headers=_get_headers())
+    resp = urlopen(req)
+    cookies=resp.info()['Set-Cookie']
+
+    content = str(resp.read().decode('utf-8').strip())
+
+    # Matches: {"crumb":"AlphaNumeric"}
+    rpat = '"CrumbStore":{"crumb":"([^"]+)"}'
+    crumb = re.findall(rpat, content)[0]
+    return  {'crumb':crumb.encode('ascii').decode('unicode-escape'), 'cookie':cookies}
+
+
+def get_historical_prices(symbol, start_date, end_date,interval='1d'):
     """
     Get historical prices for the given ticker symbol.
     Date format is 'YYYY-MM-DD'
@@ -470,21 +499,29 @@ def get_historical_prices(symbol, start_date, end_date):
     Returns a nested dictionary (dict of dicts).
     outer dict keys are dates ('YYYY-MM-DD')
     """
+
+    pattern = '%Y-%m-%d'
+
+    unix_start = int(time.mktime(time.strptime(start_date, pattern)))
+    unix_end = int(time.mktime(time.strptime(end_date, pattern)))
+
+    crumb_cookie = _get_crumb_cookie(symbol)
+
     params = urlencode({
-        's': symbol,
-        'a': int(start_date[5:7]) - 1,
-        'b': int(start_date[8:10]),
-        'c': int(start_date[0:4]),
-        'd': int(end_date[5:7]) - 1,
-        'e': int(end_date[8:10]),
-        'f': int(end_date[0:4]),
-        'g': 'd',
-        'ignore': '.csv',
-    })
-    url = 'http://real-chart.finance.yahoo.com/table.csv?%s' % params
-    req = Request(url)
+        'period1': unix_start,
+        'period2': unix_end,
+        'interval': interval,
+        'events': 'history',
+        'crumb': crumb_cookie['crumb']
+        })
+
+    url = 'https://query1.finance.yahoo.com/v7/finance/download/{}?{}'.format(symbol,params)
+
+    req = Request(url,headers=_get_headers())
+    req.add_header("Cookie", crumb_cookie['cookie'])
     resp = urlopen(req)
     content = str(resp.read().decode('utf-8').strip())
+
     daily_data = content.splitlines()
     hist_dict = dict()
     keys = daily_data[0].split(',')
