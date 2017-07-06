@@ -490,7 +490,7 @@ def _get_crumb_cookie(symbol):
 
     content = str(resp.read().decode('utf-8').strip())
 
-    # Matches: {"crumb":"AlphaNumeric"}
+    # Matches: {'crumb':'AlphaNumeric'}
     rpat = '"CrumbStore":{"crumb":"([^"]+)"}'
     crumb = re.findall(rpat, content)[0]
     return {'crumb': crumb.encode('ascii').decode('unicode-escape'),
