@@ -482,7 +482,11 @@ def _get_headers():
 
 
 def _get_crumb_cookie(symbol):
-    # Scrape a history page for a valid crumb ID:
+    """
+    Get a valid crumb id y scraping the page.
+
+    Returns a dictionary.
+    """
     tu = "https://finance.yahoo.com/quote/{}/history".format(symbol)
     req = Request(tu, headers=_get_headers())
     resp = urlopen(req)
@@ -501,6 +505,13 @@ def get_historical_prices(symbol, start_date, end_date, interval='1d'):
     """
     Get historical prices for the given ticker symbol.
     Date format is 'YYYY-MM-DD'
+
+    interval determines the rollup or aggregate of the
+    time series to return. interval can take the following values:
+
+    1d  - data returned on a daily basis. This is the default
+    1wk - data rolled up and returned on a weekly basis
+    1mo -  data rolled up and returend on a monthly basis
 
     Returns a nested dictionary (dict of dicts).
     outer dict keys are dates ('YYYY-MM-DD')

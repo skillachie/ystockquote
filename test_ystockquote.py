@@ -13,7 +13,6 @@
 
 
 import unittest
-
 import ystockquote
 
 
@@ -49,6 +48,26 @@ class YStockQuoteTestCase(unittest.TestCase):
         self.assertGreater(float(prices[end_date]['Close']), 0.0)
         self.assertGreater(float(prices[end_date]['Volume']), 0.0)
         self.assertGreater(float(prices[end_date]['Adj Close']), 0.0)
+
+    def test_get_historical_prices_1wk(self):
+        symbol = 'GOOG'
+        start_date = '2013-01-02'
+        end_date = '2013-01-15'
+        prices = ystockquote.get_historical_prices(
+            symbol, start_date, end_date, '1wk')
+
+        self.assertIsInstance(prices, dict)
+        self.assertEqual(len(prices), 2)
+
+    def test_get_historical_prices_1mo(self):
+        symbol = 'GOOG'
+        start_date = '2013-01-02'
+        end_date = '2013-04-01'
+        prices = ystockquote.get_historical_prices(
+            symbol, start_date, end_date, '1mo')
+
+        self.assertIsInstance(prices, dict)
+        self.assertEqual(len(prices), 3)
 
 
 if __name__ == '__main__':
