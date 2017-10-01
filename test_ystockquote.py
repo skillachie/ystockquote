@@ -11,7 +11,6 @@
 #
 #  Requires: Python 2.7/3.3+
 
-
 import unittest
 import ystockquote
 
@@ -57,7 +56,7 @@ class YStockQuoteTestCase(unittest.TestCase):
             symbol, start_date, end_date, '1wk')
 
         self.assertIsInstance(prices, dict)
-        self.assertEqual(len(prices), 2)
+        self.assertEqual(len(prices), 3)
 
     def test_get_historical_prices_1mo(self):
         symbol = 'GOOG'
@@ -67,7 +66,7 @@ class YStockQuoteTestCase(unittest.TestCase):
             symbol, start_date, end_date, '1mo')
 
         self.assertIsInstance(prices, dict)
-        self.assertEqual(len(prices), 3)
+        self.assertEqual(len(prices), 4)
 
 
 if __name__ == '__main__':
